@@ -14,6 +14,15 @@ namespace CoinJoinStatistics
         private static void Main(string[] args)
         {
             var coinjoinsFilePath = "CoinJoins.txt";
+            int firstBlock = 0;
+            if (File.Exists(coinjoinsFilePath))
+            {
+                string lastLine = File.ReadAllLines(coinjoinsFilePath).LastOrDefault();
+                if (lastLine != null)
+                {
+                    firstBlock = int.Parse(lastLine.Split(':')[1]) + 1;
+                }
+            }
 
             var rpc = new RPCClient(
                         credentials: new RPCCredentialString
@@ -22,8 +31,9 @@ namespace CoinJoinStatistics
                         },
                         network: Network.Main);
 
-            var lastBlock = rpc.GetBlockCount();
-            for (int i = 0; i < lastBlock; i++)
+            int lastBlock = rpc.GetBlockCount();
+
+            for (int i = firstBlock; i < lastBlock; i++)
             {
                 var block = rpc.GetBlock(i);
 
@@ -33,25 +43,17 @@ namespace CoinJoinStatistics
                     IEnumerable<(Money value, int count)> coinjoin = tx.GetIndistinguishableOutputs().Where(x => x.count > 1);
                     if (coinjoin.Any())
                     {
-                        var levelStrings = new List<string>();
-                        Money txVolume = Money.Zero;
+                        string dateString = block.Header.BlockTime.ToString("yyyy-MM-dd");
+
                         foreach (var (value, count) in coinjoin)
                         {
-                            Money volume = count * value;
-                            txVolume += volume;
-                            levelStrings.Add($"{count} * {value.ToString(false, false)}BTC = {volume.ToString(false, false)}BTC\n");
-                        }
-
-                        builder.Append($"{tx.GetHash()} {txVolume.ToString(false, false)}BTC\n");
-                        foreach (var lvlString in levelStrings)
-                        {
-                            builder.Append(lvlString);
+                            builder.Append($"{dateString}:{i}:{tx.GetHash()}:{count}:{value}\n");
                         }
                     }
                 }
                 if (builder.Length != 0)
                 {
-                    var content = $"{block.Header.BlockTime.ToString("yyyy-MM-dd")}{i} BLOCK\n{builder.ToString()}\n\n";
+                    var content = builder.ToString();
                     Console.Write(content);
                     File.AppendAllText(coinjoinsFilePath, content);
                 }
