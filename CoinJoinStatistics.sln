@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.168
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoinJoinStatistics", "CoinJoinStatistics\CoinJoinStatistics.csproj", "{30BE9117-03E0-4E16-8FF0-9E70FAA8D2FE}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{30BE9117-03E0-4E16-8FF0-9E70FAA8D2FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{30BE9117-03E0-4E16-8FF0-9E70FAA8D2FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{30BE9117-03E0-4E16-8FF0-9E70FAA8D2FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{30BE9117-03E0-4E16-8FF0-9E70FAA8D2FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {41908DC3-051A-4E63-9F11-7BD7E303E257}
+	EndGlobalSection
+EndGlobal
