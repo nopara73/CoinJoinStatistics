@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace CoinJoinStatistics
 {
@@ -14,10 +15,21 @@ namespace CoinJoinStatistics
         private static void Main(string[] args)
         {
             var coinjoinsFilePath = "CoinJoins.txt";
+            if (args.Length == 0 && File.Exists(coinjoinsFilePath))
+            {
+                DoMonthlyStatAsync(coinjoinsFilePath).GetAwaiter().GetResult();
+                return;
+            }
+
+            DoTxStatAsync(args, coinjoinsFilePath).GetAwaiter().GetResult();
+        }
+
+        private static async Task DoTxStatAsync(string[] args, string coinjoinsFilePath)
+        {
             int firstBlock = 0;
             if (File.Exists(coinjoinsFilePath))
             {
-                string lastLine = File.ReadAllLines(coinjoinsFilePath).LastOrDefault();
+                string lastLine = (await File.ReadAllLinesAsync(coinjoinsFilePath)).LastOrDefault();
                 if (lastLine != null)
                 {
                     firstBlock = int.Parse(lastLine.Split(':')[1]) + 1;
@@ -31,11 +43,11 @@ namespace CoinJoinStatistics
                         },
                         network: Network.Main);
 
-            int lastBlock = rpc.GetBlockCount();
+            int lastBlock = await rpc.GetBlockCountAsync();
 
             for (int i = firstBlock; i < lastBlock; i++)
             {
-                var block = rpc.GetBlock(i);
+                var block = await rpc.GetBlockAsync(i);
 
                 var builder = new StringBuilder($"");
                 foreach (var tx in block.Transactions)
@@ -55,9 +67,36 @@ namespace CoinJoinStatistics
                 {
                     var content = builder.ToString();
                     Console.Write(content);
-                    File.AppendAllText(coinjoinsFilePath, content);
+                    await File.AppendAllTextAsync(coinjoinsFilePath, content);
                 }
             }
+        }
+
+        private static async Task DoMonthlyStatAsync(string coinjoinsFilePath)
+        {
+            var monthlyStatFilePath = "MonthlyStat.txt";
+            var lastDate = DateTimeOffset.MinValue.Date;
+            Money volume = Money.Zero;
+            foreach (var cj in await File.ReadAllLinesAsync(coinjoinsFilePath))
+            {
+                var parts = cj.Split(':');
+                var currentDate = DateTimeOffset.Parse(parts[0]).Date;
+                var cnt = int.Parse(parts[3]);
+                var val = Money.Parse(parts[4]);
+                Money currentVolume = cnt * val;
+
+                volume += currentVolume;
+                if (currentDate.Date.Month != lastDate.Date.Month)
+                {
+                    var content = $"{lastDate.ToString("yyyy-MM")}:{volume.ToString(false, false)}\n";
+                    Console.Write(content);
+                    await File.AppendAllTextAsync(monthlyStatFilePath, content);
+                    lastDate = currentDate;
+                    volume = Money.Zero;
+                }
+            }
+
+            return;
         }
 
         public static IEnumerable<(Money value, int count)> GetIndistinguishableOutputs(this Transaction me)
