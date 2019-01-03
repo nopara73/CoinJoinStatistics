@@ -52,8 +52,8 @@ namespace CoinJoinStatistics
                 var builder = new StringBuilder($"");
                 foreach (var tx in block.Transactions)
                 {
-                    IEnumerable<(Money value, int count)> coinjoin = tx.GetIndistinguishableOutputs().Where(x => x.count > 1);
-                    if (coinjoin.Any())
+                    IEnumerable<(Money value, int count)> coinjoin = tx.GetIndistinguishableOutputs().Where(x => x.count > 1).OrderByDescending(x => x.count);
+                    if (coinjoin.Any() && coinjoin.First().count <= tx.Inputs.Count)
                     {
                         string dateString = block.Header.BlockTime.ToString("yyyy-MM-dd");
 
