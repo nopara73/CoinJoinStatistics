@@ -56,7 +56,7 @@ namespace CoinJoinStatistics
                     int transactionOutputCount = tx.Inputs.Count;
                     int coinjoinOutputCount = coinjoin.Sum(x => x.count);
                     int nonCoinjoinOutputCount = transactionOutputCount - coinjoinOutputCount;
-                    if (coinjoin.Any() && coinjoin.First().count <= tx.Inputs.Count && coinjoinOutputCount > nonCoinjoinOutputCount)
+                    if (coinjoin.Any() && coinjoin.First().count <= tx.Inputs.Count && coinjoinOutputCount >= nonCoinjoinOutputCount)
                     {
                         string dateString = block.Header.BlockTime.ToString("yyyy-MM-dd");
 
